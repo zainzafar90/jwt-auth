@@ -2,6 +2,7 @@ import {
   Arg,
   Ctx,
   Field,
+  Int,
   Mutation,
   ObjectType,
   Query,
@@ -18,6 +19,7 @@ import {
   generateAccessToken,
   isAuthenticated,
 } from "../utils/token.utils";
+import { getConnection } from "typeorm";
 
 @ObjectType()
 class LoginResponse {
@@ -84,6 +86,14 @@ export class UserResolver {
       return false;
     }
 
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async revokeRefreshTokensForUser(@Arg("userId", () => Int) userId: number) {
+    await getConnection()
+      .getRepository(User)
+      .increment({ id: userId }, "tokenVersion", 1);
     return true;
   }
 }

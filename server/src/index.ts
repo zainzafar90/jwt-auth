@@ -7,7 +7,7 @@ import { createConnection } from "typeorm";
 import cookieParser from "cookie-parser";
 import { verify } from "jsonwebtoken";
 import { User } from "./entity/User";
-import { generateAccessToken } from "./utils/token.utils";
+import { generateAccessToken, generateRefreshToken } from "./utils/token.utils";
 
 (async () => {
   const app = express();
@@ -33,6 +33,14 @@ import { generateAccessToken } from "./utils/token.utils";
       return res.send({ ok: false, accessToken: "" });
     }
 
+    if (user.tokenVersion !== payload.tokenVersion) {
+      return res.send({ ok: false, accessToken: "" });
+    }
+
+    res.cookie("jid", generateRefreshToken(user), {
+      httpOnly: true,
+    });
+
     return res.send({
       ok: true,
       accessToken: generateAccessToken(user),
@@ -49,7 +57,7 @@ import { generateAccessToken } from "./utils/token.utils";
   await apolloServer.start();
   apolloServer.applyMiddleware({ app });
 
-  app.listen(3000, () => {
-    console.log("Listen on port 3000");
+  app.listen(4000, () => {
+    console.log("Listen on port 4000");
   });
 })();
