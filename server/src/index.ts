@@ -8,10 +8,17 @@ import cookieParser from "cookie-parser";
 import { verify } from "jsonwebtoken";
 import { User } from "./entity/User";
 import { generateAccessToken, generateRefreshToken } from "./utils/token.utils";
+import cors from "cors";
 
 (async () => {
   const app = express();
   app.use(cookieParser());
+  app.use(
+    cors({
+      credentials: true,
+      origin: "http://localhost:3000",
+    })
+  );
   app.post("/refresh_token", async (req, res) => {
     const token = req.cookies.jid;
 
@@ -55,7 +62,7 @@ import { generateAccessToken, generateRefreshToken } from "./utils/token.utils";
   });
 
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(4000, () => {
     console.log("Listen on port 4000");
